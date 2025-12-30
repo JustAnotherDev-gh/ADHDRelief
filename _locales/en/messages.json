@@ -1,0 +1,131 @@
+{
+  "extensionName": {
+    "message": "ADHD Relief - Focus & Relaxation",
+    "description": "Name of the extension"
+  },
+  "extensionDescription": {
+    "message": "Focus & relax with ambient sounds: brown noise, nature sounds, lofi beats. Continuous mode or timed break mode.",
+    "description": "Description of the extension"
+  },
+
+  "appTitle": {
+    "message": "ADHD Relief"
+  },
+
+  "modeConstant": {
+    "message": "Continuous"
+  },
+  "modeBreak": {
+    "message": "Break Mode"
+  },
+
+  "soundBrown": {
+    "message": "Brown"
+  },
+  "soundPink": {
+    "message": "Pink"
+  },
+  "soundGrey": {
+    "message": "Grey"
+  },
+  "soundRain": {
+    "message": "Rain"
+  },
+  "soundOceanSurf": {
+    "message": "Ocean Surf"
+  },
+  "soundForestWaterfall": {
+    "message": "Forest Waterfall"
+  },
+  "soundLofiLoop": {
+    "message": "Lofi Loop"
+  },
+
+  "btnMyVibe": {
+    "message": "My Vibe"
+  },
+  "btnPlay": {
+    "message": "Play"
+  },
+  "btnPause": {
+    "message": "Pause"
+  },
+
+  "statusPlaying": {
+    "message": "Playing"
+  },
+  "statusStopped": {
+    "message": "Stopped"
+  },
+
+  "labelVolume": {
+    "message": "Volume"
+  },
+
+  "timerTitle": {
+    "message": "Timer"
+  },
+  "phaseBreak": {
+    "message": "Break"
+  },
+  "phaseFocus": {
+    "message": "Focus"
+  },
+
+  "btnStartTimer": {
+    "message": "Start Timer"
+  },
+  "btnStopTimer": {
+    "message": "Stop Timer"
+  },
+
+  "presetPomodoro": {
+    "message": "25/5"
+  },
+  "presetExtended": {
+    "message": "50/10"
+  },
+  "presetCustom": {
+    "message": "Custom"
+  },
+
+  "labelFocusDuration": {
+    "message": "Focus (min)"
+  },
+  "labelBreakDuration": {
+    "message": "Break (min)"
+  },
+
+  "dialogTitle": {
+    "message": "Name Your Vibe"
+  },
+  "dialogPlaceholder": {
+    "message": "Enter a name for your sound"
+  },
+  "btnSave": {
+    "message": "Save"
+  },
+  "btnCancel": {
+    "message": "Cancel"
+  },
+
+  "tooltipDelete": {
+    "message": "Delete this sound"
+  },
+  "tooltipMyVibe": {
+    "message": "Upload your own audio file"
+  },
+  "tooltipVolume": {
+    "message": "Adjust volume"
+  },
+
+  "errorInvalidFile": {
+    "message": "Please select a valid audio file"
+  },
+  "errorNameRequired": {
+    "message": "Please enter a name for your vibe"
+  },
+  "errorSaveFailed": {
+    "message": "Error saving custom sound. Please try again."
+  }
+}

@@ -1,0 +1,145 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Triggers on version tags like v1.0.0, v1.2.3, etc.
+
+jobs:
+  build:
+    name: Build and Package Extension
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Validate version matches manifest
+        run: |
+          MANIFEST_VERSION=$(jq -r '.version' manifest.json)
+          TAG_VERSION="${{ steps.get_version.outputs.VERSION }}"
+
+          echo "Manifest version: $MANIFEST_VERSION"
+          echo "Tag version: $TAG_VERSION"
+
+          if [ "$MANIFEST_VERSION" != "$TAG_VERSION" ]; then
+            echo "❌ Version mismatch!"
+            echo "manifest.json version ($MANIFEST_VERSION) doesn't match tag ($TAG_VERSION)"
+            exit 1
+          fi
+
+          echo "✅ Version validated"
+
+      - name: Create package directory
+        run: |
+          mkdir -p build
+          echo "Created build directory"
+
+      - name: Package extension
+        run: |
+          echo "Packaging ADHDRelief extension..."
+
+          # Create a clean copy excluding unnecessary files
+          rsync -av \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='node_modules' \
+            --exclude='build' \
+            --exclude='.gitignore' \
+            --exclude='*.md' \
+            --exclude='CHROME_STORE_DESCRIPTION.md' \
+            --exclude='icons/generate-icons.py' \
+            --exclude='sounds/*.Identifier' \
+            --exclude='*.log' \
+            --exclude='.DS_Store' \
+            ./ build/ADHDRelief/
+
+          # Create zip file
+          cd build
+          zip -r ADHDRelief-v${{ steps.get_version.outputs.VERSION }}.zip ADHDRelief/
+
+          echo "✅ Extension packaged successfully"
+          ls -lh *.zip
+
+      - name: Generate checksums
+        run: |
+          cd build
+          sha256sum ADHDRelief-v${{ steps.get_version.outputs.VERSION }}.zip > checksums.txt
+          cat checksums.txt
+
+      - name: Create release notes
+        id: release_notes
+        run: |
+          cat > build/RELEASE_NOTES.md << 'EOF'
+          ## ADHDRelief v${{ steps.get_version.outputs.VERSION }}
+
+          ### Installation
+
+          1. Download `ADHDRelief-v${{ steps.get_version.outputs.VERSION }}.zip`
+          2. Unzip the file
+          3. Open Chrome and go to `chrome://extensions/`
+          4. Enable "Developer mode"
+          5. Click "Load unpacked" and select the `ADHDRelief` folder
+
+          ### Verification
+
+          SHA256 Checksum:
+          ```
+          $(cat build/checksums.txt)
+          ```
+
+          ### What's Included
+
+          - Multiple ambient sounds (Brown/Pink/Grey noise, Rain, Ocean, Waterfall, Lofi)
+          - Custom sound upload feature
+          - Pomodoro timer with Break Mode
+          - ADHD-friendly interface
+          - 100% private and offline
+
+          ### Requirements
+
+          - Chrome 109+ or Edge 109+
+          - No internet connection required after installation
+          EOF
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            build/ADHDRelief-v${{ steps.get_version.outputs.VERSION }}.zip
+            build/checksums.txt
+          body_path: build/RELEASE_NOTES.md
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ADHDRelief-v${{ steps.get_version.outputs.VERSION }}
+          path: build/ADHDRelief-v${{ steps.get_version.outputs.VERSION }}.zip
+          retention-days: 90
+
+      - name: Release Summary
+        run: |
+          echo ""
+          echo "================================================"
+          echo "           Release Complete!"
+          echo "================================================"
+          echo "Version: v${{ steps.get_version.outputs.VERSION }}"
+          echo "Package: ADHDRelief-v${{ steps.get_version.outputs.VERSION }}.zip"
+          echo "================================================"
+          echo ""
+          echo "Next steps:"
+          echo "1. Download the release package from GitHub"
+          echo "2. Test the packaged extension"
+          echo "3. Upload to Chrome Web Store"
+          echo "================================================"

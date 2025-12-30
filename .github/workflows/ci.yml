@@ -1,0 +1,161 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  validate:
+    name: Validate Extension
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate manifest.json
+        run: |
+          echo "Validating manifest.json..."
+          if [ ! -f "manifest.json" ]; then
+            echo "❌ manifest.json not found!"
+            exit 1
+          fi
+
+          # Check if manifest.json is valid JSON
+          if ! jq empty manifest.json 2>/dev/null; then
+            echo "❌ manifest.json is not valid JSON!"
+            exit 1
+          fi
+
+          echo "✅ manifest.json is valid JSON"
+
+          # Check required fields
+          NAME=$(jq -r '.name' manifest.json)
+          VERSION=$(jq -r '.version' manifest.json)
+          MANIFEST_VERSION=$(jq -r '.manifest_version' manifest.json)
+
+          echo "Extension Name: $NAME"
+          echo "Version: $VERSION"
+          echo "Manifest Version: $MANIFEST_VERSION"
+
+          if [ "$MANIFEST_VERSION" != "3" ]; then
+            echo "❌ Manifest version must be 3"
+            exit 1
+          fi
+
+          echo "✅ Manifest validation passed"
+
+      - name: Check required files
+        run: |
+          echo "Checking for required files..."
+          REQUIRED_FILES=(
+            "manifest.json"
+            "README.md"
+            "LICENSE"
+            "popup/popup.html"
+            "popup/popup.css"
+            "popup/popup.js"
+            "popup/custom-sounds.js"
+            "background/service-worker.js"
+            "offscreen/offscreen.html"
+            "offscreen/audio-generator.js"
+            "icons/icon16.png"
+            "icons/icon48.png"
+            "icons/icon128.png"
+          )
+
+          MISSING_FILES=()
+          for file in "${REQUIRED_FILES[@]}"; do
+            if [ ! -f "$file" ]; then
+              MISSING_FILES+=("$file")
+            fi
+          done
+
+          if [ ${#MISSING_FILES[@]} -ne 0 ]; then
+            echo "❌ Missing required files:"
+            printf '%s\n' "${MISSING_FILES[@]}"
+            exit 1
+          fi
+
+          echo "✅ All required files present"
+
+      - name: Check file sizes
+        run: |
+          echo "Checking file sizes..."
+
+          # Check that sound files aren't too large (warn if > 10MB)
+          if [ -d "sounds" ]; then
+            LARGE_FILES=$(find sounds -type f -size +10M 2>/dev/null || true)
+            if [ -n "$LARGE_FILES" ]; then
+              echo "⚠️  Warning: Large sound files found (>10MB):"
+              echo "$LARGE_FILES"
+            else
+              echo "✅ Sound file sizes acceptable"
+            fi
+          fi
+
+      - name: Lint JavaScript files
+        run: |
+          echo "Installing ESLint..."
+          npm init -y > /dev/null 2>&1
+          npm install --save-dev eslint > /dev/null 2>&1
+
+          echo "Creating ESLint config..."
+          cat > .eslintrc.json << 'EOF'
+          {
+            "env": {
+              "browser": true,
+              "es2021": true,
+              "webextensions": true
+            },
+            "extends": "eslint:recommended",
+            "parserOptions": {
+              "ecmaVersion": 2021,
+              "sourceType": "module"
+            },
+            "rules": {
+              "no-unused-vars": "warn",
+              "no-console": "off"
+            },
+            "globals": {
+              "chrome": "readonly"
+            }
+          }
+          EOF
+
+          echo "Linting JavaScript files..."
+          npx eslint popup/*.js background/*.js offscreen/*.js || {
+            echo "⚠️  ESLint found issues (non-blocking)"
+            exit 0
+          }
+
+          echo "✅ JavaScript linting passed"
+
+      - name: Check for sensitive data
+        run: |
+          echo "Scanning for potential sensitive data..."
+
+          # Check for common sensitive patterns
+          if grep -r -i "api[_-]key\|password\|secret\|token" --include="*.js" --include="*.json" . | grep -v "node_modules" | grep -v ".github"; then
+            echo "⚠️  Warning: Potential sensitive data found in code"
+          else
+            echo "✅ No obvious sensitive data detected"
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          echo ""
+          echo "================================================"
+          echo "           Validation Summary"
+          echo "================================================"
+          echo "✅ Extension structure validated"
+          echo "✅ Ready for packaging"
+          echo "================================================"

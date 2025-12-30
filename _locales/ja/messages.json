@@ -1,0 +1,131 @@
+{
+  "extensionName": {
+    "message": "ADHD Relief - 集中とリラックス",
+    "description": "Name of the extension"
+  },
+  "extensionDescription": {
+    "message": "アンビエント音で集中しリラックス：ブラウンノイズ、自然音、ローファイビート。連続モードまたは時間指定の休憩モード。",
+    "description": "Description of the extension"
+  },
+
+  "appTitle": {
+    "message": "ADHD Relief"
+  },
+
+  "modeConstant": {
+    "message": "継続"
+  },
+  "modeBreak": {
+    "message": "休憩モード"
+  },
+
+  "soundBrown": {
+    "message": "ブラウン"
+  },
+  "soundPink": {
+    "message": "ピンク"
+  },
+  "soundGrey": {
+    "message": "グレー"
+  },
+  "soundRain": {
+    "message": "雨"
+  },
+  "soundOceanSurf": {
+    "message": "波の音"
+  },
+  "soundForestWaterfall": {
+    "message": "森の滝"
+  },
+  "soundLofiLoop": {
+    "message": "ローファイループ"
+  },
+
+  "btnMyVibe": {
+    "message": "マイサウンド"
+  },
+  "btnPlay": {
+    "message": "再生"
+  },
+  "btnPause": {
+    "message": "一時停止"
+  },
+
+  "statusPlaying": {
+    "message": "再生中"
+  },
+  "statusStopped": {
+    "message": "停止"
+  },
+
+  "labelVolume": {
+    "message": "音量"
+  },
+
+  "timerTitle": {
+    "message": "タイマー"
+  },
+  "phaseBreak": {
+    "message": "休憩"
+  },
+  "phaseFocus": {
+    "message": "集中"
+  },
+
+  "btnStartTimer": {
+    "message": "タイマー開始"
+  },
+  "btnStopTimer": {
+    "message": "タイマー停止"
+  },
+
+  "presetPomodoro": {
+    "message": "25/5"
+  },
+  "presetExtended": {
+    "message": "50/10"
+  },
+  "presetCustom": {
+    "message": "カスタム"
+  },
+
+  "labelFocusDuration": {
+    "message": "集中時間（分）"
+  },
+  "labelBreakDuration": {
+    "message": "休憩時間（分）"
+  },
+
+  "dialogTitle": {
+    "message": "サウンド名を入力"
+  },
+  "dialogPlaceholder": {
+    "message": "サウンドの名前を入力してください"
+  },
+  "btnSave": {
+    "message": "保存"
+  },
+  "btnCancel": {
+    "message": "キャンセル"
+  },
+
+  "tooltipDelete": {
+    "message": "このサウンドを削除"
+  },
+  "tooltipMyVibe": {
+    "message": "独自のオーディオファイルをアップロード"
+  },
+  "tooltipVolume": {
+    "message": "音量調整"
+  },
+
+  "errorInvalidFile": {
+    "message": "有効なオーディオファイルを選択してください"
+  },
+  "errorNameRequired": {
+    "message": "サウンドの名前を入力してください"
+  },
+  "errorSaveFailed": {
+    "message": "カスタムサウンドの保存に失敗しました。もう一度お試しください。"
+  }
+}

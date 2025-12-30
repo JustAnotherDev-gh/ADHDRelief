@@ -1,0 +1,131 @@
+{
+  "extensionName": {
+    "message": "ADHD Relief - Концентрация и Релаксация",
+    "description": "Name of the extension"
+  },
+  "extensionDescription": {
+    "message": "Сосредоточьтесь и расслабьтесь с помощью фоновых звуков: коричневый шум, звуки природы, лофи-биты. Непрерывный режим или запланированные перерывы.",
+    "description": "Description of the extension"
+  },
+
+  "appTitle": {
+    "message": "ADHD Relief"
+  },
+
+  "modeConstant": {
+    "message": "Непрерывный"
+  },
+  "modeBreak": {
+    "message": "Режим Перерыва"
+  },
+
+  "soundBrown": {
+    "message": "Коричневый"
+  },
+  "soundPink": {
+    "message": "Розовый"
+  },
+  "soundGrey": {
+    "message": "Серый"
+  },
+  "soundRain": {
+    "message": "Дождь"
+  },
+  "soundOceanSurf": {
+    "message": "Океанский Прибой"
+  },
+  "soundForestWaterfall": {
+    "message": "Лесной Водопад"
+  },
+  "soundLofiLoop": {
+    "message": "Лофи Цикл"
+  },
+
+  "btnMyVibe": {
+    "message": "Мой Звук"
+  },
+  "btnPlay": {
+    "message": "Воспроизвести"
+  },
+  "btnPause": {
+    "message": "Пауза"
+  },
+
+  "statusPlaying": {
+    "message": "Воспроизведение"
+  },
+  "statusStopped": {
+    "message": "Остановлено"
+  },
+
+  "labelVolume": {
+    "message": "Громкость"
+  },
+
+  "timerTitle": {
+    "message": "Таймер"
+  },
+  "phaseBreak": {
+    "message": "Перерыв"
+  },
+  "phaseFocus": {
+    "message": "Фокус"
+  },
+
+  "btnStartTimer": {
+    "message": "Запустить Таймер"
+  },
+  "btnStopTimer": {
+    "message": "Остановить Таймер"
+  },
+
+  "presetPomodoro": {
+    "message": "25/5"
+  },
+  "presetExtended": {
+    "message": "50/10"
+  },
+  "presetCustom": {
+    "message": "Настроить"
+  },
+
+  "labelFocusDuration": {
+    "message": "Фокус (мин)"
+  },
+  "labelBreakDuration": {
+    "message": "Перерыв (мин)"
+  },
+
+  "dialogTitle": {
+    "message": "Назовите Ваш Звук"
+  },
+  "dialogPlaceholder": {
+    "message": "Введите название для вашего звука"
+  },
+  "btnSave": {
+    "message": "Сохранить"
+  },
+  "btnCancel": {
+    "message": "Отмена"
+  },
+
+  "tooltipDelete": {
+    "message": "Удалить этот звук"
+  },
+  "tooltipMyVibe": {
+    "message": "Загрузить собственный аудиофайл"
+  },
+  "tooltipVolume": {
+    "message": "Настроить громкость"
+  },
+
+  "errorInvalidFile": {
+    "message": "Пожалуйста, выберите действительный аудиофайл"
+  },
+  "errorNameRequired": {
+    "message": "Пожалуйста, введите название для вашего звука"
+  },
+  "errorSaveFailed": {
+    "message": "Ошибка сохранения пользовательского звука. Пожалуйста, попробуйте снова."
+  }
+}

@@ -1,0 +1,131 @@
+{
+  "extensionName": {
+    "message": "ADHD Relief - Concentration et Détente",
+    "description": "Name of the extension"
+  },
+  "extensionDescription": {
+    "message": "Concentrez-vous et détendez-vous avec des sons ambiants : bruit brun, sons de la nature, rythmes lofi. Mode continu ou pauses programmées.",
+    "description": "Description of the extension"
+  },
+
+  "appTitle": {
+    "message": "ADHD Relief"
+  },
+
+  "modeConstant": {
+    "message": "Continu"
+  },
+  "modeBreak": {
+    "message": "Mode Pause"
+  },
+
+  "soundBrown": {
+    "message": "Brun"
+  },
+  "soundPink": {
+    "message": "Rose"
+  },
+  "soundGrey": {
+    "message": "Gris"
+  },
+  "soundRain": {
+    "message": "Pluie"
+  },
+  "soundOceanSurf": {
+    "message": "Vagues Océan"
+  },
+  "soundForestWaterfall": {
+    "message": "Cascade Forêt"
+  },
+  "soundLofiLoop": {
+    "message": "Boucle Lofi"
+  },
+
+  "btnMyVibe": {
+    "message": "Mon Son"
+  },
+  "btnPlay": {
+    "message": "Lecture"
+  },
+  "btnPause": {
+    "message": "Pause"
+  },
+
+  "statusPlaying": {
+    "message": "En lecture"
+  },
+  "statusStopped": {
+    "message": "Arrêté"
+  },
+
+  "labelVolume": {
+    "message": "Volume"
+  },
+
+  "timerTitle": {
+    "message": "Minuterie"
+  },
+  "phaseBreak": {
+    "message": "Pause"
+  },
+  "phaseFocus": {
+    "message": "Focus"
+  },
+
+  "btnStartTimer": {
+    "message": "Démarrer la Minuterie"
+  },
+  "btnStopTimer": {
+    "message": "Arrêter la Minuterie"
+  },
+
+  "presetPomodoro": {
+    "message": "25/5"
+  },
+  "presetExtended": {
+    "message": "50/10"
+  },
+  "presetCustom": {
+    "message": "Personnalisé"
+  },
+
+  "labelFocusDuration": {
+    "message": "Focus (min)"
+  },
+  "labelBreakDuration": {
+    "message": "Pause (min)"
+  },
+
+  "dialogTitle": {
+    "message": "Nommez Votre Son"
+  },
+  "dialogPlaceholder": {
+    "message": "Entrez un nom pour votre son"
+  },
+  "btnSave": {
+    "message": "Enregistrer"
+  },
+  "btnCancel": {
+    "message": "Annuler"
+  },
+
+  "tooltipDelete": {
+    "message": "Supprimer ce son"
+  },
+  "tooltipMyVibe": {
+    "message": "Téléchargez votre propre fichier audio"
+  },
+  "tooltipVolume": {
+    "message": "Ajuster le volume"
+  },
+
+  "errorInvalidFile": {
+    "message": "Veuillez sélectionner un fichier audio valide"
+  },
+  "errorNameRequired": {
+    "message": "Veuillez entrer un nom pour votre son"
+  },
+  "errorSaveFailed": {
+    "message": "Erreur lors de l'enregistrement du son personnalisé. Veuillez réessayer."
+  }
+}

@@ -1,0 +1,131 @@
+{
+  "extensionName": {
+    "message": "ADHD Relief - Fokus & Entspannung",
+    "description": "Name of the extension"
+  },
+  "extensionDescription": {
+    "message": "Fokussieren und entspannen Sie mit Umgebungsgeräuschen: Braunes Rauschen, Naturklänge, Lofi-Beats. Kontinuierlicher Modus oder zeitgesteuerte Pausen.",
+    "description": "Description of the extension"
+  },
+
+  "appTitle": {
+    "message": "ADHD Relief"
+  },
+
+  "modeConstant": {
+    "message": "Kontinuierlich"
+  },
+  "modeBreak": {
+    "message": "Pausenmodus"
+  },
+
+  "soundBrown": {
+    "message": "Braun"
+  },
+  "soundPink": {
+    "message": "Rosa"
+  },
+  "soundGrey": {
+    "message": "Grau"
+  },
+  "soundRain": {
+    "message": "Regen"
+  },
+  "soundOceanSurf": {
+    "message": "Meeresbrandung"
+  },
+  "soundForestWaterfall": {
+    "message": "Waldwasserfall"
+  },
+  "soundLofiLoop": {
+    "message": "Lofi-Schleife"
+  },
+
+  "btnMyVibe": {
+    "message": "Mein Sound"
+  },
+  "btnPlay": {
+    "message": "Abspielen"
+  },
+  "btnPause": {
+    "message": "Pause"
+  },
+
+  "statusPlaying": {
+    "message": "Wird abgespielt"
+  },
+  "statusStopped": {
+    "message": "Gestoppt"
+  },
+
+  "labelVolume": {
+    "message": "Lautstärke"
+  },
+
+  "timerTitle": {
+    "message": "Timer"
+  },
+  "phaseBreak": {
+    "message": "Pause"
+  },
+  "phaseFocus": {
+    "message": "Fokus"
+  },
+
+  "btnStartTimer": {
+    "message": "Timer starten"
+  },
+  "btnStopTimer": {
+    "message": "Timer stoppen"
+  },
+
+  "presetPomodoro": {
+    "message": "25/5"
+  },
+  "presetExtended": {
+    "message": "50/10"
+  },
+  "presetCustom": {
+    "message": "Benutzerdefiniert"
+  },
+
+  "labelFocusDuration": {
+    "message": "Fokus (Min)"
+  },
+  "labelBreakDuration": {
+    "message": "Pause (Min)"
+  },
+
+  "dialogTitle": {
+    "message": "Benennen Sie Ihren Sound"
+  },
+  "dialogPlaceholder": {
+    "message": "Geben Sie einen Namen für Ihren Sound ein"
+  },
+  "btnSave": {
+    "message": "Speichern"
+  },
+  "btnCancel": {
+    "message": "Abbrechen"
+  },
+
+  "tooltipDelete": {
+    "message": "Diesen Sound löschen"
+  },
+  "tooltipMyVibe": {
+    "message": "Laden Sie Ihre eigene Audiodatei hoch"
+  },
+  "tooltipVolume": {
+    "message": "Lautstärke anpassen"
+  },
+
+  "errorInvalidFile": {
+    "message": "Bitte wählen Sie eine gültige Audiodatei aus"
+  },
+  "errorNameRequired": {
+    "message": "Bitte geben Sie einen Namen für Ihren Sound ein"
+  },
+  "errorSaveFailed": {
+    "message": "Fehler beim Speichern des benutzerdefinierten Sounds. Bitte versuchen Sie es erneut."
+  }
+}
