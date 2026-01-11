@@ -7,8 +7,8 @@ const TIMER_ALARM = 'adhdrelief-timer';
 // Default state
 const DEFAULT_STATE = {
   isPlaying: false,
-  mode: 'constant', // 'constant' (continuous) or 'break'
-  noiseType: 'forestwaterfall', // 'brown', 'pink', 'grey', 'rain', 'oceansurf', 'forestwaterfall', 'lofiloop'
+  mode: 'constant', // 'constant' (continuous), 'focus' (audio during focus only), or 'break' (audio during breaks only)
+  noiseType: 'forestwaterfall', // 'brown', 'pink', 'grey', '832hz', 'rain', 'oceansurf', 'forestwaterfall', 'lofiloop'
   volume: 50,
   timerState: {
     preset: '25/5', // '25/5', '50/10', 'custom'
@@ -16,7 +16,8 @@ const DEFAULT_STATE = {
     breakDuration: 5, // minutes
     currentPhase: 'focus', // 'focus' or 'break'
     timeRemaining: 25 * 60, // seconds
-    isActive: false
+    isActive: false,
+    isPaused: false
   }
 };
 
@@ -24,18 +25,24 @@ let currentState = { ...DEFAULT_STATE };
 let offscreenCreated = false;
 
 // Initialize extension
-async function initialize(resumeAudio = false) {
-  console.log('[ADHD Relief] Service worker initializing... (resumeAudio:', resumeAudio, ')');
+async function initialize({ resumeAudio = false, resetIsPlaying = false } = {}) {
+  console.log('[ADHD Relief] Service worker initializing... (resumeAudio:', resumeAudio, ', resetIsPlaying:', resetIsPlaying, ')');
 
   // Load saved state
   const stored = await chrome.storage.local.get(null);
   if (stored && Object.keys(stored).length > 0) {
-    currentState = { ...DEFAULT_STATE, ...stored };
+    currentState = {
+      ...DEFAULT_STATE,
+      ...stored,
+      timerState: {
+        ...DEFAULT_STATE.timerState,
+        ...(stored.timerState || {})
+      }
+    };
 
-    // Always set isPlaying to false on initialization unless explicitly resuming
-    // This prevents auto-play on browser startup
+    // Optionally reset isPlaying to false (used on install/startup to prevent auto-play)
     const wasPlaying = currentState.isPlaying;
-    if (!resumeAudio) {
+    if (resetIsPlaying) {
       currentState.isPlaying = false;
       // Save the updated state immediately to persist isPlaying: false
       await saveState();
@@ -217,6 +224,16 @@ async function switchMode(mode) {
         await stop();
       }
     }
+  } else if (mode === 'focus') {
+    // In focus mode, audio should be on during focus, off during breaks
+    if (currentState.timerState.isActive) {
+      const shouldPlay = currentState.timerState.currentPhase === 'focus';
+      if (shouldPlay && !currentState.isPlaying) {
+        await play();
+      } else if (!shouldPlay && currentState.isPlaying) {
+        await stop();
+      }
+    }
   } else if (mode === 'constant') {
     // In continuous mode, respect the current playing state
     // (don't automatically change it)
@@ -245,6 +262,7 @@ async function switchNoiseType(noiseType) {
 // Start timer
 async function startTimer() {
   currentState.timerState.isActive = true;
+  currentState.timerState.isPaused = false;
   currentState.timerState.currentPhase = 'focus';
   currentState.timerState.timeRemaining = currentState.timerState.focusDuration * 60;
 
@@ -256,12 +274,51 @@ async function startTimer() {
   if (currentState.mode === 'break' && currentState.isPlaying) {
     await stop();
   }
+
+  // In focus mode, start audio during focus
+  if (currentState.mode === 'focus' && !currentState.isPlaying) {
+    await play();
+  }
 }
 
-// Stop timer
-async function stopTimer() {
-  currentState.timerState.isActive = false;
+// Pause timer
+async function pauseTimer() {
+  if (!currentState.timerState.isActive) return;
+  currentState.timerState.isPaused = true;
   await chrome.alarms.clear(TIMER_ALARM);
+  if (currentState.mode !== 'constant' && currentState.isPlaying) {
+    await stop();
+  }
+  await saveState();
+  broadcastStateUpdate();
+}
+
+// Resume timer
+async function resumeTimer() {
+  if (!currentState.timerState.isActive) return;
+  if (!currentState.timerState.isPaused) return;
+  currentState.timerState.isPaused = false;
+  startTimerAlarm();
+  if (currentState.mode !== 'constant') {
+    const shouldPlay = currentState.timerState.currentPhase === currentState.mode;
+    if (shouldPlay && !currentState.isPlaying) {
+      await playWithTimerFade();
+    }
+  }
+  await saveState();
+  broadcastStateUpdate();
+}
+
+// Reset timer
+async function resetTimer() {
+  currentState.timerState.isActive = false;
+  currentState.timerState.isPaused = false;
+  currentState.timerState.currentPhase = 'focus';
+  currentState.timerState.timeRemaining = currentState.timerState.focusDuration * 60;
+  await chrome.alarms.clear(TIMER_ALARM);
+  if (currentState.mode !== 'constant' && currentState.isPlaying) {
+    await stop();
+  }
   await saveState();
   broadcastStateUpdate();
 }
@@ -275,7 +332,7 @@ function startTimerAlarm() {
 
 // Handle timer tick
 async function handleTimerTick() {
-  if (!currentState.timerState.isActive) return;
+  if (!currentState.timerState.isActive || currentState.timerState.isPaused) return;
 
   currentState.timerState.timeRemaining--;
 
@@ -302,6 +359,11 @@ async function switchTimerPhase() {
       await playWithTimerFade();
     }
 
+    // In focus mode, turn off audio during break
+    if (currentState.mode === 'focus' && currentState.isPlaying) {
+      await stop();
+    }
+
     console.log('[ADHD Relief] Switched to break phase');
   } else {
     // Switch to focus
@@ -311,6 +373,11 @@ async function switchTimerPhase() {
     // In break mode, turn off audio during focus
     if (currentState.mode === 'break' && currentState.isPlaying) {
       await stop();
+    }
+
+    // In focus mode, turn on audio during focus with gradual 5-second fade
+    if (currentState.mode === 'focus' && !currentState.isPlaying) {
+      await playWithTimerFade();
     }
 
     console.log('[ADHD Relief] Switched to focus phase');
@@ -350,59 +417,81 @@ function broadcastStateUpdate() {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log('[ADHD Relief] Service worker received message:', message);
 
+  let responded = false;
+  const respond = (payload) => {
+    if (responded) return;
+    responded = true;
+    sendResponse(payload);
+  };
+
   (async () => {
-    switch (message.type) {
-      case 'GET_STATE':
-        sendResponse({ success: true, state: currentState });
-        break;
+    try {
+      switch (message.type) {
+        case 'GET_STATE':
+          respond({ success: true, state: currentState });
+          break;
 
-      case 'PLAY':
-        await play();
-        sendResponse({ success: true });
-        break;
+        case 'PLAY':
+          await play();
+          respond({ success: true });
+          break;
 
-      case 'STOP':
-        await stop();
-        sendResponse({ success: true });
-        break;
+        case 'STOP':
+          await stop();
+          respond({ success: true });
+          break;
 
-      case 'TOGGLE_PLAY':
-        await togglePlay();
-        sendResponse({ success: true });
-        break;
+        case 'TOGGLE_PLAY':
+          await togglePlay();
+          respond({ success: true });
+          break;
 
-      case 'SET_VOLUME':
-        await setVolume(message.volume);
-        sendResponse({ success: true });
-        break;
+        case 'SET_VOLUME':
+          await setVolume(message.volume);
+          respond({ success: true });
+          break;
 
-      case 'SWITCH_MODE':
-        await switchMode(message.mode);
-        sendResponse({ success: true });
-        break;
+        case 'SWITCH_MODE':
+          await switchMode(message.mode);
+          respond({ success: true });
+          break;
 
-      case 'SWITCH_NOISE_TYPE':
-        await switchNoiseType(message.noiseType);
-        sendResponse({ success: true });
-        break;
+        case 'SWITCH_NOISE_TYPE':
+          await switchNoiseType(message.noiseType);
+          respond({ success: true });
+          break;
 
       case 'START_TIMER':
         await startTimer();
-        sendResponse({ success: true });
+        respond({ success: true });
         break;
 
-      case 'STOP_TIMER':
-        await stopTimer();
-        sendResponse({ success: true });
+      case 'PAUSE_TIMER':
+        await pauseTimer();
+        respond({ success: true });
         break;
 
-      case 'UPDATE_TIMER_SETTINGS':
-        await updateTimerSettings(message.settings);
-        sendResponse({ success: true });
+      case 'RESUME_TIMER':
+        await resumeTimer();
+        respond({ success: true });
         break;
 
-      default:
-        sendResponse({ success: false, error: 'Unknown message type' });
+      case 'RESET_TIMER':
+        await resetTimer();
+        respond({ success: true });
+        break;
+
+        case 'UPDATE_TIMER_SETTINGS':
+          await updateTimerSettings(message.settings);
+          respond({ success: true });
+          break;
+
+        default:
+          respond({ success: false, error: 'Unknown message type' });
+      }
+    } catch (error) {
+      console.error('[ADHD Relief] Error handling message:', error);
+      respond({ success: false, error: error?.message || 'Unknown error' });
     }
   })();
 
@@ -419,7 +508,15 @@ chrome.commands.onCommand.addListener(async (command) => {
       break;
 
     case 'switch-mode':
-      const newMode = currentState.mode === 'constant' ? 'break' : 'constant';
+      // Cycle through modes: constant -> focus -> break -> constant
+      let newMode;
+      if (currentState.mode === 'constant') {
+        newMode = 'focus';
+      } else if (currentState.mode === 'focus') {
+        newMode = 'break';
+      } else {
+        newMode = 'constant';
+      }
       await switchMode(newMode);
       break;
 
@@ -443,14 +540,14 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 // Initialize on install/update
 chrome.runtime.onInstalled.addListener(() => {
   console.log('[ADHD Relief] Extension installed/updated');
-  initialize(false); // Don't resume audio on install/update
+  initialize({ resetIsPlaying: true }); // Don't resume audio on install/update
 });
 
 // Initialize on startup - NEVER resume audio on browser startup
 chrome.runtime.onStartup.addListener(() => {
   console.log('[ADHD Relief] Browser started');
-  initialize(false); // Don't resume audio on browser startup
+  initialize({ resetIsPlaying: true }); // Don't resume audio on browser startup
 });
 
-// Initialize immediately (service worker restart) - don't resume audio
-initialize(false);
+// Initialize immediately (service worker restart) - don't reset isPlaying
+initialize();

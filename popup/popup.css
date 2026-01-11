@@ -14,33 +14,13 @@ body {
   width: 360px;
   margin: 0;
   padding: 0;
-  overflow: hidden; /* never scroll the document */
+  overflow-x: hidden;
+  overflow-y: hidden;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background: #1a1a1a;
   color: #e0e0e0;
   font-size: 14px;
   line-height: 1.5;
-}
-
-/* Scroll wrapper - only scrolls in break mode */
-.scroll-area {
-  width: 100%;
-  max-height: 600px; /* stay within popup max */
-  overflow-x: hidden;
-  overflow-y: hidden; /* continuous mode */
-  overscroll-behavior: contain;
-}
-
-/* Only break mode may scroll */
-body.break-mode .scroll-area {
-  overflow-y: auto;
-}
-body.break-mode .scroll-area {
-  scrollbar-gutter: stable;
-}
-
-body:not(.break-mode) .scroll-area {
-  scrollbar-gutter: auto;
 }
 
 .container {
@@ -91,7 +71,7 @@ body:not(.break-mode) .scroll-area {
   border-radius: 8px;
   color: #999;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 700;
   cursor: pointer;
   min-height: 44px;
   /* Large click target */
@@ -125,7 +105,7 @@ body:not(.break-mode) .scroll-area {
   color: #999;
   font-size: 12px;
   font-weight: 500;
-  cursor: grab;
+  cursor: pointer;
   min-height: 44px;
   text-align: center;
   transition: all 0.2s;
@@ -145,10 +125,6 @@ body:not(.break-mode) .scroll-area {
   color: #b3d4e0;
 }
 
-.noise-btn.dragging {
-  opacity: 0.5;
-  cursor: grabbing;
-}
 
 .noise-btn-text {
   flex: 1;
@@ -307,12 +283,12 @@ body:not(.break-mode) .scroll-area {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 80px;
-  height: 80px;
+  width: 140px;
+  height: 56px;
   margin: 0 auto 12px;
   background: #2d4a5c;
   border: none;
-  border-radius: 50%;
+  border-radius: 20px;
   color: #b3d4e0;
   cursor: pointer;
   /* Large click target */
@@ -332,12 +308,6 @@ body:not(.break-mode) .scroll-area {
   height: 40px;
 }
 
-.play-status {
-  display: block;
-  text-align: center;
-  font-size: 13px;
-  color: #999;
-}
 
 /* Volume Control */
 .control-label {
@@ -566,7 +536,7 @@ body:not(.break-mode) .scroll-area {
 
 /* Info Section */
 .info-section {
-  margin-top: 16px;
+  margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid #333;
   position: relative;
