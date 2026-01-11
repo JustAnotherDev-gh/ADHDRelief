@@ -7,8 +7,7 @@
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <div class="scroll-area">
-    <div class="container">
+  <div class="container">
     <!-- Header -->
     <header class="header">
       <img src="../icons/logo.png" alt="ADHD Relief Logo" class="logo">
@@ -19,6 +18,9 @@
     <div class="mode-selector">
       <button id="mode-constant" class="mode-btn active" data-mode="constant" data-i18n="modeConstant">
         Continuous
+      </button>
+      <button id="mode-focus" class="mode-btn" data-mode="focus" data-i18n="modeFocus">
+        Focus Mode
       </button>
       <button id="mode-break" class="mode-btn" data-mode="break" data-i18n="modeBreak">
         Break Mode
@@ -46,7 +48,7 @@
     </div>
 
     <!-- Play/Pause Control -->
-    <div class="control-section">
+    <div id="play-control-section" class="control-section">
       <button id="play-btn" class="play-btn" aria-label="Play">
         <svg class="play-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polygon points="5 3 19 12 5 21 5 3"></polygon>
@@ -56,7 +58,6 @@
           <rect x="14" y="4" width="4" height="16"></rect>
         </svg>
       </button>
-      <span id="play-status" class="play-status">Ready</span>
     </div>
 
     <!-- Volume Control -->
@@ -93,7 +94,9 @@
       <!-- Timer Controls -->
       <div class="timer-controls">
         <button id="start-timer-btn" class="timer-btn" data-i18n="btnStartTimer">Start</button>
-        <button id="stop-timer-btn" class="timer-btn secondary hidden" data-i18n="btnStopTimer">Stop</button>
+        <button id="pause-timer-btn" class="timer-btn hidden" data-i18n="btnPauseTimer">Pause</button>
+        <button id="resume-timer-btn" class="timer-btn hidden" data-i18n="btnResumeTimer">Continue</button>
+        <button id="reset-timer-btn" class="timer-btn secondary hidden" data-i18n="btnResetTimer">Reset</button>
       </div>
 
       <!-- Preset Selector -->
@@ -141,13 +144,13 @@
       </a>
       <p class="info-text">
         <strong>Constant:</strong> Noise plays continuously<br>
+        <strong>Focus Mode:</strong> Noise during focus only<br>
         <strong>Break Mode:</strong> Noise during breaks only
       </p>
       <p class="privacy-text">
         No tracking. No accounts. Runs locally.
       </p>
     </div>
-  </div>
   </div>
 
   <script src="custom-sounds.js"></script>

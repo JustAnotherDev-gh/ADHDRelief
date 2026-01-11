@@ -15,6 +15,9 @@
   "modeConstant": {
     "message": "Kontinuierlich"
   },
+  "modeFocus": {
+    "message": "Fokusmodus"
+  },
   "modeBreak": {
     "message": "Pausenmodus"
   },
@@ -77,6 +80,15 @@
   },
   "btnStopTimer": {
     "message": "Timer stoppen"
+  },
+  "btnPauseTimer": {
+    "message": "Pausieren"
+  },
+  "btnResumeTimer": {
+    "message": "Weiter"
+  },
+  "btnResetTimer": {
+    "message": "Zuruecksetzen"
   },
 
   "presetPomodoro": {

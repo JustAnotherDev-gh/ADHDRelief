@@ -1,6 +1,6 @@
 // Noise Generator for ADHD Relief
 // Runs in offscreen document to provide audio context
-// Supports: Brown, Pink, Grey noise, Rain, Ocean Surf, Forest Waterfall, and Lofi Loop
+// Supports: Brown, Pink, Grey noise, 832 Hz tone, Rain, Ocean Surf, Forest Waterfall, and Lofi Loop
 
 // Audio state
 let audioContext = null;
@@ -8,7 +8,7 @@ let noiseSource = null;
 let gainNode = null;
 let isPlaying = false;
 let currentVolume = 50; // 0-100
-let currentNoiseType = 'brown'; // 'brown', 'pink', 'grey', 'rain', 'oceansurf', 'forestwaterfall', 'lofiloop'
+let currentNoiseType = 'brown'; // 'brown', 'pink', 'grey', '832hz', 'rain', 'oceansurf', 'forestwaterfall', 'lofiloop'
 let fadeTimeout = null;
 
 // Lofi loop state
@@ -104,6 +104,19 @@ function generateGreyNoise(bufferSize) {
     for (let i = 0; i < bufferSize; i++) {
       output[i] = (output[i] / max) * 0.5;
     }
+  }
+
+  return output;
+}
+
+// Generate 832 Hz sine wave tone
+function generate832Hz(bufferSize) {
+  const output = new Float32Array(bufferSize);
+  const frequency = 832;
+
+  for (let i = 0; i < bufferSize; i++) {
+    // Generate sine wave: amplitude * sin(2π * frequency * time)
+    output[i] = Math.sin(2 * Math.PI * frequency * (i / SAMPLE_RATE)) * 0.3;
   }
 
   return output;
@@ -212,6 +225,9 @@ async function createNoiseBuffer(type) {
       break;
     case 'grey':
       samples = generateGreyNoise(bufferSize);
+      break;
+    case '832hz':
+      samples = generate832Hz(bufferSize);
       break;
     case 'brown':
     default:
@@ -427,7 +443,7 @@ async function changeNoiseType(noiseType) {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   // Only handle messages meant for offscreen document
   const handledTypes = [
-    'PLAY', 'STOP', 'SET_VOLUME', 'CHANGE_NOISE_TYPE', 'GET_STATE'
+    'PLAY', 'STOP', 'SET_VOLUME', 'CHANGE_NOISE_TYPE'
   ];
 
   if (!handledTypes.includes(message.type)) {
@@ -465,14 +481,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           sendResponse({ success: true, noiseType: currentNoiseType });
           break;
 
-        case 'GET_STATE':
-          sendResponse({
-            success: true,
-            isPlaying,
-            volume: currentVolume,
-            noiseType: currentNoiseType
-          });
-          break;
       }
     } catch (error) {
       console.error('[ADHD Relief] Error handling message:', error);

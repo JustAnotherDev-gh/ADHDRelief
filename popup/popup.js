@@ -44,6 +44,7 @@ const BUILTIN_SOUNDS = [
   { id: 'rain', name: i18n('soundRain'), builtin: true },
   { id: 'oceansurf', name: i18n('soundOceanSurf'), builtin: true },
   { id: 'lofiloop', name: i18n('soundLofiLoop'), builtin: true },
+  { id: '832hz', name: '832 Hz', builtin: true },
   { id: 'brown', name: i18n('soundBrown'), builtin: true },
   { id: 'pink', name: i18n('soundPink'), builtin: true },
   { id: 'grey', name: i18n('soundGrey'), builtin: true }
@@ -53,6 +54,7 @@ const BUILTIN_SOUNDS = [
 const elements = {
   // Mode buttons
   modeConstantBtn: document.getElementById('mode-constant'),
+  modeFocusBtn: document.getElementById('mode-focus'),
   modeBreakBtn: document.getElementById('mode-break'),
 
   // Noise selector
@@ -66,10 +68,10 @@ const elements = {
   nameCancelBtn: document.getElementById('name-cancel-btn'),
 
   // Play controls
+  playControlSection: document.getElementById('play-control-section'),
   playBtn: document.getElementById('play-btn'),
   playIcon: document.querySelector('.play-icon'),
   pauseIcon: document.querySelector('.pause-icon'),
-  playStatus: document.getElementById('play-status'),
 
   // Volume
   volumeSlider: document.getElementById('volume-slider'),
@@ -80,7 +82,9 @@ const elements = {
   currentPhase: document.getElementById('current-phase'),
   timerValue: document.getElementById('timer-value'),
   startTimerBtn: document.getElementById('start-timer-btn'),
-  stopTimerBtn: document.getElementById('stop-timer-btn'),
+  pauseTimerBtn: document.getElementById('pause-timer-btn'),
+  resumeTimerBtn: document.getElementById('resume-timer-btn'),
+  resetTimerBtn: document.getElementById('reset-timer-btn'),
 
   // Preset
   presetBtns: document.querySelectorAll('.preset-btn'),
@@ -88,6 +92,15 @@ const elements = {
   focusDuration: document.getElementById('focus-duration'),
   breakDuration: document.getElementById('break-duration')
 };
+
+function updateBodyOverflow() {
+  requestAnimationFrame(() => {
+    const viewportHeight = document.documentElement.clientHeight;
+    const needsScroll = document.body.scrollHeight > viewportHeight + 20;
+    document.body.style.overflowY = needsScroll ? 'auto' : 'hidden';
+  });
+}
+
 
 // Send message to service worker
 async function sendMessage(message) {
@@ -118,13 +131,27 @@ function updateUI(state) {
   // Update mode buttons and body class
   if (state.mode === 'constant') {
     elements.modeConstantBtn.classList.add('active');
+    elements.modeFocusBtn.classList.remove('active');
     elements.modeBreakBtn.classList.remove('active');
     elements.timerSection.classList.add('hidden');
+    elements.playControlSection.classList.remove('hidden');
     document.body.classList.remove('break-mode');
+    document.body.classList.remove('focus-mode');
+  } else if (state.mode === 'focus') {
+    elements.modeConstantBtn.classList.remove('active');
+    elements.modeFocusBtn.classList.add('active');
+    elements.modeBreakBtn.classList.remove('active');
+    elements.timerSection.classList.remove('hidden');
+    elements.playControlSection.classList.add('hidden');
+    document.body.classList.remove('break-mode');
+    document.body.classList.add('focus-mode');
   } else {
     elements.modeConstantBtn.classList.remove('active');
+    elements.modeFocusBtn.classList.remove('active');
     elements.modeBreakBtn.classList.add('active');
     elements.timerSection.classList.remove('hidden');
+    elements.playControlSection.classList.add('hidden');
+    document.body.classList.remove('focus-mode');
     document.body.classList.add('break-mode');
   }
 
@@ -143,11 +170,9 @@ function updateUI(state) {
   if (state.isPlaying) {
     elements.playIcon.classList.add('hidden');
     elements.pauseIcon.classList.remove('hidden');
-    elements.playStatus.textContent = i18n('statusPlaying');
   } else {
     elements.playIcon.classList.remove('hidden');
     elements.pauseIcon.classList.add('hidden');
-    elements.playStatus.textContent = i18n('statusStopped');
   }
 
   // Update volume
@@ -156,11 +181,14 @@ function updateUI(state) {
 
   // Update timer display
   if (state.timerState) {
-    const { currentPhase, timeRemaining, isActive, focusDuration, breakDuration, preset } = state.timerState;
+    const { currentPhase, timeRemaining, isActive, isPaused, focusDuration, breakDuration, preset } = state.timerState;
+    const displayPhase = !isActive && state.mode !== 'constant'
+      ? state.mode
+      : currentPhase;
 
     // Update phase indicator
-    elements.currentPhase.textContent = currentPhase === 'focus' ? i18n('phaseFocus') : i18n('phaseBreak');
-    if (currentPhase === 'break') {
+    elements.currentPhase.textContent = displayPhase === 'focus' ? i18n('phaseFocus') : i18n('phaseBreak');
+    if (displayPhase === 'break') {
       elements.currentPhase.classList.add('break');
     } else {
       elements.currentPhase.classList.remove('break');
@@ -170,12 +198,21 @@ function updateUI(state) {
     elements.timerValue.textContent = formatTime(timeRemaining);
 
     // Update timer buttons
-    if (isActive) {
-      elements.startTimerBtn.classList.add('hidden');
-      elements.stopTimerBtn.classList.remove('hidden');
-    } else {
+    if (!isActive) {
       elements.startTimerBtn.classList.remove('hidden');
-      elements.stopTimerBtn.classList.add('hidden');
+      elements.pauseTimerBtn.classList.add('hidden');
+      elements.resumeTimerBtn.classList.add('hidden');
+      elements.resetTimerBtn.classList.add('hidden');
+    } else if (isPaused) {
+      elements.startTimerBtn.classList.add('hidden');
+      elements.pauseTimerBtn.classList.add('hidden');
+      elements.resumeTimerBtn.classList.remove('hidden');
+      elements.resetTimerBtn.classList.remove('hidden');
+    } else {
+      elements.startTimerBtn.classList.add('hidden');
+      elements.pauseTimerBtn.classList.remove('hidden');
+      elements.resumeTimerBtn.classList.add('hidden');
+      elements.resetTimerBtn.classList.remove('hidden');
     }
 
     // Update preset buttons
@@ -198,6 +235,8 @@ function updateUI(state) {
     elements.focusDuration.value = focusDuration;
     elements.breakDuration.value = breakDuration;
   }
+
+  updateBodyOverflow();
 }
 
 // Load initial state
@@ -219,6 +258,10 @@ async function loadState() {
 // Mode switching
 elements.modeConstantBtn.addEventListener('click', async () => {
   await sendMessage({ type: 'SWITCH_MODE', mode: 'constant' });
+});
+
+elements.modeFocusBtn.addEventListener('click', async () => {
+  await sendMessage({ type: 'SWITCH_MODE', mode: 'focus' });
 });
 
 elements.modeBreakBtn.addEventListener('click', async () => {
@@ -244,8 +287,16 @@ elements.startTimerBtn.addEventListener('click', async () => {
   await sendMessage({ type: 'START_TIMER' });
 });
 
-elements.stopTimerBtn.addEventListener('click', async () => {
-  await sendMessage({ type: 'STOP_TIMER' });
+elements.pauseTimerBtn.addEventListener('click', async () => {
+  await sendMessage({ type: 'PAUSE_TIMER' });
+});
+
+elements.resumeTimerBtn.addEventListener('click', async () => {
+  await sendMessage({ type: 'RESUME_TIMER' });
+});
+
+elements.resetTimerBtn.addEventListener('click', async () => {
+  await sendMessage({ type: 'RESET_TIMER' });
 });
 
 // Preset selection
@@ -309,12 +360,10 @@ async function renderSoundButtons() {
 
     elements.noiseSelector.innerHTML = '';
 
-    allSounds.forEach((sound, index) => {
+    allSounds.forEach((sound) => {
     const btn = document.createElement('button');
     btn.className = 'noise-btn';
     btn.dataset.noise = sound.id;
-    btn.draggable = true;
-    btn.dataset.index = index;
 
     // Add delete button for custom sounds
     if (!sound.builtin) {
@@ -339,12 +388,6 @@ async function renderSoundButtons() {
       }
       await sendMessage({ type: 'SWITCH_NOISE_TYPE', noiseType: sound.id });
     });
-
-    // Drag and drop handlers
-    btn.addEventListener('dragstart', handleDragStart);
-    btn.addEventListener('dragend', handleDragEnd);
-    btn.addEventListener('dragover', handleDragOver);
-    btn.addEventListener('drop', handleDrop);
 
     elements.noiseSelector.appendChild(btn);
   });
@@ -387,75 +430,10 @@ async function renderSoundButtons() {
       await renderSoundButtons();
     });
   });
+
+  updateBodyOverflow();
   } catch (error) {
     console.error('[ADHD Relief] Error rendering sound buttons:', error);
-  }
-}
-
-// Drag and drop state
-let draggedElement = null;
-
-function handleDragStart(e) {
-  draggedElement = e.target;
-  e.target.classList.add('dragging');
-  e.dataTransfer.effectAllowed = 'move';
-}
-
-function handleDragEnd(e) {
-  e.target.classList.remove('dragging');
-  draggedElement = null;
-}
-
-function handleDragOver(e) {
-  e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
-
-  const afterElement = getDragAfterElement(elements.noiseSelector, e.clientY);
-  if (afterElement == null) {
-    elements.noiseSelector.appendChild(draggedElement);
-  } else {
-    elements.noiseSelector.insertBefore(draggedElement, afterElement);
-  }
-}
-
-function handleDrop(e) {
-  e.preventDefault();
-  // Save new order
-  saveButtonOrder();
-}
-
-function getDragAfterElement(container, y) {
-  const draggableElements = [...container.querySelectorAll('.noise-btn:not(.dragging)')];
-
-  return draggableElements.reduce((closest, child) => {
-    const box = child.getBoundingClientRect();
-    const offset = y - box.top - box.height / 2;
-
-    if (offset < 0 && offset > closest.offset) {
-      return { offset: offset, element: child };
-    } else {
-      return closest;
-    }
-  }, { offset: Number.NEGATIVE_INFINITY }).element;
-}
-
-async function saveButtonOrder() {
-  const buttons = elements.noiseSelector.querySelectorAll('.noise-btn');
-  const customSounds = await window.customSoundsDB.getAllCustomSounds();
-
-  // Update order for custom sounds only
-  const reorderedCustomSounds = [];
-  buttons.forEach((btn, index) => {
-    const soundId = btn.dataset.noise;
-    const customSound = customSounds.find(s => s.id === soundId);
-    if (customSound) {
-      customSound.order = index;
-      reorderedCustomSounds.push(customSound);
-    }
-  });
-
-  if (reorderedCustomSounds.length > 0) {
-    await window.customSoundsDB.updateSoundOrder(reorderedCustomSounds);
   }
 }
 
@@ -538,6 +516,9 @@ elements.vibeNameInput.addEventListener('keypress', (e) => {
 async function initialize() {
   await renderSoundButtons();
   await loadState();
+  updateBodyOverflow();
 }
 
 initialize();
+
+window.addEventListener('resize', updateBodyOverflow);
